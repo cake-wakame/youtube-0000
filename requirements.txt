@@ -3,5 +3,3 @@ uvicorn[standard]
 requests
 jinja2
 fastapi
-requests
-uvicorn[standard]
