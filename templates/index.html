@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TubeViewer</title>
+    <style>
+        :root {
+            --bg-dark: #0f0f0f;
+            --bg-light: #272727;
+            --text: #ffffff;
+            --accent: #ff0000;
+            --border: #303030;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text);
+            font-family: 'Roboto', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .home {
+            text-align: center;
+            padding: 20px;
+        }
+        .logo {
+            font-size: 56px;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 30px;
+        }
+        .logo span { color: var(--text); }
+        .search-form {
+            display: flex;
+            max-width: 600px;
+            width: 100%;
+        }
+        .search-form input {
+            flex: 1;
+            padding: 14px 20px;
+            border: 1px solid var(--border);
+            background-color: var(--bg-light);
+            color: var(--text);
+            border-radius: 24px 0 0 24px;
+            outline: none;
+            font-size: 18px;
+        }
+        .search-form button {
+            padding: 14px 28px;
+            border: 1px solid var(--border);
+            background-color: var(--bg-light);
+            color: var(--text);
+            border-radius: 0 24px 24px 0;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .search-form button:hover { background-color: var(--border); }
+    </style>
+</head>
+<body>
+    <div class="home">
+        <h1 class="logo">Tube<span>Viewer</span></h1>
+        <form action="/search" method="get" class="search-form">
+            <input type="text" name="q" placeholder="動画を検索..." required autofocus>
+            <button type="submit">検索</button>
+        </form>
+    </div>
+</body>
+</html>
