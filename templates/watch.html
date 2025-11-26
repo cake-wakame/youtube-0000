@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block title %}{{ video.title }}{% endblock %}
+{% block extra_style %}
+<style>
+    .watch-container { display: flex; gap: 24px; flex-wrap: wrap; }
+    .main-content { flex: 1; min-width: 0; }
+    .player-container {
+        width: 100%;
+        aspect-ratio: 16/9;
+        background-color: #000;
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+    }
+    .player-container video,
+    .player-container iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+    .player-buttons {
+        display: flex;
+        gap: 8px;
+        margin: 12px 0;
+        flex-wrap: wrap;
+    }
+    .player-btn {
+        padding: 8px 16px;
+        background-color: var(--bg-light);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    .player-btn:hover { background-color: var(--border); }
+    .player-btn.active { background-color: var(--accent); border-color: var(--accent); }
+    .video-title { font-size: 20px; font-weight: 500; margin: 16px 0; }
+    .channel-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    .channel-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    .channel-name { font-weight: 500; }
+    .channel-subs { font-size: 12px; color: var(--text-sub); }
+    .video-stats { color: var(--text-sub); font-size: 14px; margin-bottom: 16px; }
+    .video-stats span { margin-right: 16px; }
+    .description {
+        background-color: var(--bg-light);
+        padding: 16px;
+        border-radius: 12px;
+        white-space: pre-wrap;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+    .sidebar { width: 400px; }
+    .sidebar h3 { margin-bottom: 16px; font-size: 16px; }
+    .related-video {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+    .related-video:hover { opacity: 0.8; }
+    .related-thumb {
+        width: 168px;
+        min-width: 168px;
+        aspect-ratio: 16/9;
+        background-color: #000;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .related-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .related-info { font-size: 14px; }
+    .related-title {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin-bottom: 4px;
+    }
+    .related-meta { color: var(--text-sub); font-size: 12px; }
+    @media (max-width: 1000px) {
+        .sidebar { width: 100%; }
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="watch-container">
+    <div class="main-content">
+        <div class="player-container" id="player-container">
+            <iframe id="yt-player" src="https://www.youtube-nocookie.com/embed/{{ videoid }}?autoplay=1" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+            <video id="video-player" style="display:none;" controls poster="https://i.ytimg.com/vi/{{ videoid }}/maxresdefault.jpg"></video>
+        </div>
+        <div class="player-buttons">
+            <button class="player-btn active" onclick="switchPlayer('youtube')">YouTube埋め込み</button>
+            <button class="player-btn" onclick="switchPlayer('stream')">ストリーム再生</button>
+        </div>
+        <h1 class="video-title">{{ video.title }}</h1>
+        <div class="channel-row">
+            {% if video.author_icon %}
+            <a href="/channel/{{ video.author_id }}">
+                <img src="{{ video.author_icon }}" class="channel-icon" alt="">
+            </a>
+            {% endif %}
+            <div>
+                <a href="/channel/{{ video.author_id }}" class="channel-name">{{ video.author }}</a>
+                <div class="channel-subs">{{ video.subscribers }}</div>
+            </div>
+        </div>
+        <div class="video-stats">
+            <span>{{ video.views }}</span>
+            <span>{{ video.published }}</span>
+            <span>{{ video.likes }}</span>
+        </div>
+        <div class="description">{{ video.description | safe }}</div>
+    </div>
+    <div class="sidebar">
+        <h3>関連動画</h3>
+        {% for rel in related %}
+        <a href="/watch?v={{ rel.id }}" class="related-video">
+            <div class="related-thumb">
+                <img src="{{ rel.thumbnail }}" alt="">
+            </div>
+            <div class="related-info">
+                <div class="related-title">{{ rel.title }}</div>
+                <div class="related-meta">{{ rel.author }}</div>
+                <div class="related-meta">{{ rel.views }}</div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+<script>
+const videoId = '{{ videoid }}';
+const ytPlayer = document.getElementById('yt-player');
+const videoPlayer = document.getElementById('video-player');
+const buttons = document.querySelectorAll('.player-btn');
+let streamUrl = null;
+
+function switchPlayer(mode) {
+    buttons.forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    if (mode === 'youtube') {
+        ytPlayer.style.display = 'block';
+        videoPlayer.style.display = 'none';
+        videoPlayer.pause();
+    } else if (mode === 'stream') {
+        ytPlayer.style.display = 'none';
+        videoPlayer.style.display = 'block';
+        if (!streamUrl) {
+            videoPlayer.poster = 'https://i.ytimg.com/vi/' + videoId + '/maxresdefault.jpg';
+            fetch('/api/stream/' + videoId)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.url) {
+                        streamUrl = data.url;
+                        videoPlayer.src = streamUrl;
+                        videoPlayer.play();
+                    } else {
+                        alert('ストリームの取得に失敗しました。YouTube埋め込みをご利用ください。');
+                        switchPlayer('youtube');
+                    }
+                })
+                .catch(() => {
+                    alert('ストリームの取得に失敗しました。');
+                });
+        } else {
+            videoPlayer.play();
+        }
+    }
+}
+</script>
+{% endblock %}
