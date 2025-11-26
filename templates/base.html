@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}YouTube Viewer{% endblock %}</title>
+    <style>
+        :root {
+            --bg-dark: #0f0f0f;
+            --bg-light: #272727;
+            --text: #ffffff;
+            --text-sub: #aaaaaa;
+            --accent: #ff0000;
+            --border: #303030;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text);
+            font-family: 'Roboto', Arial, sans-serif;
+            min-height: 100vh;
+        }
+        a { color: var(--text); text-decoration: none; }
+        a:hover { color: var(--accent); }
+        .header {
+            background-color: var(--bg-light);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent);
+        }
+        .logo span { color: var(--text); }
+        .search-form {
+            flex: 1;
+            max-width: 600px;
+            display: flex;
+        }
+        .search-form input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid var(--border);
+            background-color: var(--bg-dark);
+            color: var(--text);
+            border-radius: 24px 0 0 24px;
+            outline: none;
+            font-size: 16px;
+        }
+        .search-form button {
+            padding: 10px 20px;
+            border: 1px solid var(--border);
+            background-color: var(--bg-light);
+            color: var(--text);
+            border-radius: 0 24px 24px 0;
+            cursor: pointer;
+        }
+        .search-form button:hover { background-color: var(--border); }
+        .container { padding: 20px; max-width: 1400px; margin: 0 auto; }
+    </style>
+    {% block extra_style %}{% endblock %}
+</head>
+<body>
+    <header class="header">
+        <a href="/" class="logo">Tube<span>Viewer</span></a>
+        <form action="/search" method="get" class="search-form">
+            <input type="text" name="q" placeholder="検索..." value="{{ query or '' }}">
+            <button type="submit">検索</button>
+        </form>
+    </header>
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
