@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}{{ query }} - 検索結果{% endblock %}
+{% block extra_style %}
+<style>
+    .results { display: flex; flex-direction: column; gap: 16px; }
+    .video-card {
+        display: flex;
+        gap: 16px;
+        padding: 12px;
+        background-color: var(--bg-light);
+        border-radius: 8px;
+    }
+    .video-card:hover { background-color: var(--border); }
+    .thumbnail {
+        width: 320px;
+        min-width: 320px;
+        aspect-ratio: 16/9;
+        background-color: #000;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+    .video-info { flex: 1; }
+    .video-title {
+        font-size: 18px;
+        font-weight: 500;
+        margin-bottom: 8px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .video-meta { color: var(--text-sub); font-size: 14px; }
+    .video-meta span { margin-right: 12px; }
+    .channel-card {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        background-color: var(--bg-light);
+        border-radius: 8px;
+    }
+    .channel-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        margin-top: 24px;
+    }
+    .pagination a {
+        padding: 10px 24px;
+        background-color: var(--bg-light);
+        border-radius: 8px;
+    }
+    @media (max-width: 768px) {
+        .video-card { flex-direction: column; }
+        .thumbnail { width: 100%; min-width: auto; }
+    }
+</style>
+{% endblock %}
+{% block content %}
+<h2 style="margin-bottom: 20px;">「{{ query }}」の検索結果</h2>
+<div class="results">
+    {% for item in results %}
+        {% if item.type == "video" %}
+        <a href="/watch?v={{ item.id }}" class="video-card">
+            <div class="thumbnail">
+                <img src="https://i.ytimg.com/vi/{{ item.id }}/mqdefault.jpg" alt="">
+            </div>
+            <div class="video-info">
+                <div class="video-title">{{ item.title }}</div>
+                <div class="video-meta">
+                    <span>{{ item.author }}</span>
+                    <span>{{ item.views }}</span>
+                    <span>{{ item.published }}</span>
+                    <span>{{ item.length }}</span>
+                </div>
+            </div>
+        </a>
+        {% elif item.type == "channel" %}
+        <a href="/channel/{{ item.id }}" class="channel-card">
+            <img src="{{ item.thumbnail }}" class="channel-icon" alt="">
+            <div>
+                <div style="font-size: 18px; font-weight: 500;">{{ item.author }}</div>
+                <div style="color: var(--text-sub);">チャンネル</div>
+            </div>
+        </a>
+        {% elif item.type == "playlist" %}
+        <div class="video-card">
+            <div class="video-info">
+                <div class="video-title">{{ item.title }}</div>
+                <div class="video-meta">
+                    <span>再生リスト</span>
+                    <span>{{ item.count }}本の動画</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    {% else %}
+        <p>検索結果が見つかりませんでした。</p>
+    {% endfor %}
+</div>
+<div class="pagination">
+    {% if page > 1 %}
+    <a href="/search?q={{ query }}&page={{ page - 1 }}">前のページ</a>
+    {% endif %}
+    <a href="/search?q={{ query }}&page={{ page + 1 }}">次のページ</a>
+</div>
+{% endblock %}
